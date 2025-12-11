@@ -21,16 +21,27 @@ yarn-error.log*
 *.temp
 .cache/
 
-# Node modules (se adicionar no futuro)
+# Node modules
 node_modules/
 package-lock.json
 yarn.lock
+pnpm-lock.yaml
+
+# Build files
+dist/
+build/
+*.local
 
 # Arquivos de ambiente
 .env
 .env.local
+.env.*.local
 
-# Build files (se adicionar no futuro)
-dist/
-build/
+# Sui
+.sui/
+*.mv
 
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/build/
