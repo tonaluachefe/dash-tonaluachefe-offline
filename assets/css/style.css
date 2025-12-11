@@ -1,0 +1,71 @@
+:root {
+    --bg:#0D1117;
+    --card:#0F1720;
+    --muted:#9AA3B2;
+    --fg:#E6EAF0;
+    --accent:#3B82F6;
+    --glass:rgba(255,255,255,0.06);
+    --radius:12px;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+}
+
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 240px;
+    background: var(--card);
+    padding: 20px;
+    height: 100vh;
+    position: fixed;
+}
+
+.sidebar a {
+    display: block;
+    text-decoration: none;
+    padding: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    border-radius: var(--radius);
+    transition: 0.2s;
+    font-size: 15px;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+    background: #16202c;
+    color: var(--fg);
+}
+
+/* Main area */
+.main {
+    margin-left: 260px;
+    padding: 24px;
+    flex: 1;
+}
+
+.card {
+    background: var(--glass);
+    padding: 20px;
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,0.09);
+    margin-bottom: 16px;
+}
+
+.kpi {
+    font-size: 26px;
+    font-weight: bold;
+}

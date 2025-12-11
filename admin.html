@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Admin Panel - Offline</title>
+    <link rel="stylesheet" href="assets/css/site-base.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+    <div class="app">
+        <div class="sidebar">
+            <a href="index.html">Home</a>
+            <a href="airdrops.html">My Airdrops</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="pools.html">Pools</a>
+            <a href="stakes.html">Stakes</a>
+            <a href="wallets.html">Wallets</a>
+            <a href="tarefas.html">Tasks</a>
+            <a href="admin.html" class="active">Admin Panel</a>
+        </div>
+
+        <div class="main">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+                <div>
+                    <h1>Admin Panel</h1>
+                    <p style="color:var(--muted);margin-top:0">Gerenciamento de usuários e estatísticas</p>
+                </div>
+                <button onclick="UserManager.logout()" style="padding:10px 20px;border-radius:8px;background:#ef4444;color:#fff;border:none;cursor:pointer;">Logout</button>
+            </div>
+
+            <!-- Estatísticas Gerais -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;">
+                <div class="card" style="padding:20px;background:linear-gradient(135deg,#1e3a8a,#1e40af);border:1px solid rgba(59,130,246,0.2);">
+                    <div style="color:var(--muted);font-size:13px;margin-bottom:8px;">Total de Usuários</div>
+                    <div style="font-size:32px;font-weight:bold;color:#60a5fa;" id="total-users">0</div>
+                </div>
+                <div class="card" style="padding:20px;background:linear-gradient(135deg,#1b4332,#2d6a4f);border:1px solid rgba(16,185,129,0.2);">
+                    <div style="color:var(--muted);font-size:13px;margin-bottom:8px;">Usuários Ativos</div>
+                    <div style="font-size:32px;font-weight:bold;color:#10b981;" id="active-users">0</div>
+                </div>
+                <div class="card" style="padding:20px;background:linear-gradient(135deg,#5b21b6,#7c3aed);border:1px solid rgba(168,85,247,0.2);">
+                    <div style="color:var(--muted);font-size:13px;margin-bottom:8px;">Ganhos Totais</div>
+                    <div style="font-size:32px;font-weight:bold;color:#d8b4fe;" id="total-gains">$0.00</div>
+                </div>
+                <div class="card" style="padding:20px;background:linear-gradient(135deg,#ea580c,#f97316);border:1px solid rgba(249,115,22,0.2);">
+                    <div style="color:var(--muted);font-size:13px;margin-bottom:8px;">Projetos Totais</div>
+                    <div style="font-size:32px;font-weight:bold;color:#fdba74;" id="total-projects">0</div>
+                </div>
+            </div>
+
+            <!-- Lista de Usuários -->
+            <div class="card" style="padding:24px;">
+                <h2 style="margin:0 0 20px 0;color:#fff;">Usuários Cadastrados</h2>
+                <div style="margin-bottom:16px;">
+                    <input id="user-search" placeholder="Buscar por email..." style="width:100%;max-width:400px;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:#fff;">
+                </div>
+                <div id="users-list" style="display:grid;gap:16px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/admin.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+

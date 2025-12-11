@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Meus Airdrops - Offline</title>
+    <link rel="stylesheet" href="assets/css/site-base.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+    <div class="app">
+        <div class="sidebar">
+            <a href="index.html" class="active">Home</a>
+            <a href="airdrops.html">My Airdrops</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="pools.html">Pools</a>
+            <a href="stakes.html">Stakes</a>
+            <a href="wallets.html">Wallets</a>
+            <a href="tarefas.html">Tasks</a>
+            <a href="admin.html" style="color:#3b82f6;">Admin</a>
+            <a href="#" onclick="UserManager.logout(); return false;" style="color:#ef4444;">Logout</a>
+        </div>
+
+        <div class="main">
+            <h1>Meus Airdrops</h1>
+            <p style="color:var(--muted);margin-top:0">Gerencie e acompanhe seus projetos (2)</p>
+
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;">
+                <input id="airdrops-search" placeholder="Buscar por nome, email ou wallet..." style="flex:1;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;">
+                <select id="airdrops-status-filter" style="padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;">
+                    <option value="">Todos os Status</option>
+                    <option value="Não começou">Não começou</option>
+                    <option value="Em andamento">Em andamento</option>
+                    <option value="Concluído">Concluído</option>
+                </select>
+                <select id="airdrops-category-filter" style="padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;cursor:pointer;">
+                    <option value="">Todas Categorias</option>
+                    <!-- Categorias serão populadas dinamicamente -->
+                </select>
+                <button id="export-airdrops" style="padding:10px 14px;border-radius:8px;background:#10b981;color:#fff;border:none;cursor:pointer;">Exportar CSV</button>
+                <button id="add-airdrop" style="padding:10px 14px;border-radius:8px;background:#3b82f6;color:#fff;border:none;cursor:pointer;">+ Adicionar Airdrop</button>
+            </div>
+
+            <div id="airdrops-list" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;"></div>
+        </div>
+
+        <!-- Modal para Tarefas do Airdrop -->
+        <div id="airdrop-tasks-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:999;overflow-y:auto;padding:20px;">
+            <div style="max-width:600px;margin:auto;background:#1a1f2e;border-radius:12px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.1);">
+                    <div style="width:40px;height:40px;background:#6366f1;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;">T</div>
+                    <div>
+                        <h3 style="margin:0;color:#fff;" id="task-modal-airdrop-name">Airdrop Name</h3>
+                        <p style="margin:6px 0 0 0;color:var(--muted);font-size:13px;" id="task-modal-airdrop-desc">Gerencie as tarefas deste airdrop</p>
+                    </div>
+                    <button id="tasks-modal-close" style="margin-left:auto;background:none;border:none;color:#aaa;font-size:24px;cursor:pointer;">✕</button>
+                </div>
+
+                <div style="margin-bottom:20px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                        <h4 style="margin:0;color:#fff;">Lista de Tarefas</h4>
+                        <button id="add-task-btn" style="padding:8px 12px;border-radius:6px;background:#10b981;color:#fff;border:none;cursor:pointer;">+ Adicionar Tarefa</button>
+                    </div>
+                    <div id="tasks-list" style="max-height:400px;overflow-y:auto;"></div>
+                </div>
+
+                <div style="text-align:right;">
+                    <button id="tasks-modal-done" style="padding:10px 20px;border-radius:8px;background:#6366f1;color:#fff;border:none;cursor:pointer;font-weight:500;">Feito</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para Adicionar/Editar Tarefa -->
+        <div id="task-form-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;">
+            <div style="background:#fff;border-radius:12px;padding:24px;width:90%;max-width:500px;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+                <h3 style="margin:0 0 20px 0;color:#000;">Nova Tarefa</h3>
+
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;margin-bottom:6px;color:#333;font-size:14px;font-weight:500;">Nome da Tarefa*</label>
+                    <input id="task-name" type="text" placeholder="Ex: Fazer swap diário, Conectar carteira..." style="width:100%;padding:10px;border-radius:8px;background:#f3f4f6;border:1px solid #d1d5db;color:#000;box-sizing:border-box;">
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;margin-bottom:6px;color:#333;font-size:14px;font-weight:500;">Frequência*</label>
+                    <select id="task-frequency" style="width:100%;padding:10px;border-radius:8px;background:#f3f4f6;border:1px solid #d1d5db;color:#000;box-sizing:border-box;">
+                        <option value="Única">Única</option>
+                        <option value="Diária">Diária</option>
+                        <option value="Semanal">Semanal</option>
+                        <option value="Mensal">Mensal</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;margin-bottom:6px;color:#333;font-size:14px;font-weight:500;">Descrição</label>
+                    <textarea id="task-description" placeholder="Descreva os detalhes da tarefa..." style="width:100%;padding:10px;border-radius:8px;background:#f3f4f6;border:1px solid #d1d5db;color:#000;box-sizing:border-box;font-family:inherit;resize:vertical;min-height:80px;"></textarea>
+                </div>
+
+                <div style="margin-bottom:20px;">
+                    <label style="display:block;margin-bottom:6px;color:#333;font-size:14px;font-weight:500;">Link (Opcional)</label>
+                    <input id="task-link" type="text" placeholder="https://app.exemplo.com/task" style="width:100%;padding:10px;border-radius:8px;background:#f3f4f6;border:1px solid #d1d5db;color:#000;box-sizing:border-box;">
+                </div>
+
+                <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;">
+                    <div style="flex:1;">
+                        <label style="display:block;margin-bottom:6px;color:#333;font-size:14px;font-weight:500;">Data</label>
+                        <input id="task-date" type="date" style="width:100%;padding:10px;border-radius:8px;background:#f3f4f6;border:1px solid #d1d5db;color:#000;box-sizing:border-box;">
+                    </div>
+                    <div style="width:140px;">
+                        <label style="display:block;margin-bottom:6px;color:#333;font-size:14px;font-weight:500;">Hora</label>
+                        <input id="task-time" type="time" style="width:100%;padding:10px;border-radius:8px;background:#f3f4f6;border:1px solid #d1d5db;color:#000;box-sizing:border-box;">
+                    </div>
+                </div>
+                <div style="margin-bottom:12px;color:var(--muted);font-size:12px;">Observação: o dia "reseta" às <strong>21:00 (BRT)</strong>. Ao adicionar ao Google Calendar, o evento usará o horário inserido aqui (padrão: próxima janela às 21:00 BRT).</div>
+
+                <!-- Recurrence advanced options -->
+                <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
+                    <div style="flex:1;">
+                        <label style="display:block;margin-bottom:6px;color:#333;font-size:14px;font-weight:500;">Repetir até (opcional)</label>
+                        <input id="task-until-date" type="date" style="width:100%;padding:10px;border-radius:8px;background:#f3f4f6;border:1px solid #d1d5db;color:#000;box-sizing:border-box;">
+                    </div>
+                    <div style="width:120px;">
+                        <label style="display:block;margin-bottom:6px;color:#333;font-size:14px;font-weight:500;">Intervalo</label>
+                        <input id="task-interval" type="number" min="1" value="1" style="width:100%;padding:10px;border-radius:8px;background:#f3f4f6;border:1px solid #d1d5db;color:#000;box-sizing:border-box;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;margin-bottom:6px;color:#333;font-size:14px;font-weight:500;">Dias da semana (para recorrência semanal)</label>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <label><input type="checkbox" class="task-weekday" value="MO"> Seg</label>
+                        <label><input type="checkbox" class="task-weekday" value="TU"> Ter</label>
+                        <label><input type="checkbox" class="task-weekday" value="WE"> Qua</label>
+                        <label><input type="checkbox" class="task-weekday" value="TH"> Qui</label>
+                        <label><input type="checkbox" class="task-weekday" value="FR"> Sex</label>
+                        <label><input type="checkbox" class="task-weekday" value="SA"> Sáb</label>
+                        <label><input type="checkbox" class="task-weekday" value="SU"> Dom</label>
+                    </div>
+                </div>
+
+                <div id="rrule-preview" style="background:#f0f9ff;border:1px solid #bfdbfe;border-radius:6px;padding:10px;margin-bottom:16px;color:#1e40af;font-size:12px;display:none;"></div>
+
+
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                    <button id="task-form-cancel" style="padding:10px 20px;border-radius:8px;background:transparent;border:1px solid #d1d5db;color:#333;cursor:pointer;">Cancelar</button>
+                    <button id="task-form-download-ics" style="padding:10px 20px;border-radius:8px;background:#8b5cf6;color:#fff;border:none;cursor:pointer;font-weight:500;margin-right:6px;">Gerar .ics</button>
+                    <button id="task-form-add-calendar" style="padding:10px 20px;border-radius:8px;background:#3b82f6;color:#fff;border:none;cursor:pointer;font-weight:500;margin-right:6px;">Adicionar ao Calendar</button>
+                    <button id="task-form-save" style="padding:10px 20px;border-radius:8px;background:#10b981;color:#fff;border:none;cursor:pointer;font-weight:500;">Salvar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para Adicionar/Editar Airdrop -->
+        <div id="airdrop-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:1000;overflow-y:auto;">
+            <div style="padding:20px;display:flex;align-items:center;justify-content:center;min-height:100vh;">
+                <div style="background:#1a1f2e;border-radius:12px;padding:24px;width:90%;max-width:700px;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+                    <h2 style="margin:0 0 24px 0;color:#fff;">Novo Airdrop</h2>
+
+                    <!-- Nome do Projeto -->
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">Nome do Projeto*</label>
+                        <input id="airdrop-name" type="text" placeholder="Ex: LazyZero, Arbitrum..." style="width:100%;padding:10px;border-radius:8px;background:#0f1419;border:1px solid rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;">
+                    </div>
+
+                    <!-- Identificadores (Email/Wallet) -->
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">Identificadores (Email/Wallet)</label>
+                        <div id="airdrop-identifiers" style="margin-bottom:10px;"></div>
+                        <button id="airdrop-add-identifier" type="button" style="padding:8px 12px;border-radius:6px;background:rgba(59,130,246,0.2);border:1px solid #3b82f6;color:#3b82f6;cursor:pointer;">+ Adicionar Identificador</button>
+                    </div>
+
+                    <!-- Categoria e Status (2 colunas) -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                        <div>
+                            <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">Categoria</label>
+                            <select id="airdrop-category" style="width:100%;padding:10px;border-radius:8px;background:#0f1419;border:1px solid rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;cursor:pointer;">
+                                <option value="">Selecione...</option>
+                                <option value="Testnet">Testnet</option>
+                                <option value="DeFi">DeFi</option>
+                                <option value="Gaming">Gaming</option>
+                                <option value="Stake">Stake</option>
+                                <option value="Dex">Dex</option>
+                                <option value="Bridge">Bridge</option>
+                                <option value="AI">AI</option>
+                                <option value="RWA">RWA</option>
+                                <option value="Stablecoin">Stablecoin</option>
+                                <option value="Social">Social</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">Status</label>
+                            <select id="airdrop-status" style="width:100%;padding:10px;border-radius:8px;background:#0f1419;border:1px solid rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;">
+                                <option value="Não começou">Não começou</option>
+                                <option value="Em andamento">Em andamento</option>
+                                <option value="Concluído">Concluído</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Estimativa e Valor Recebido (2 colunas) -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                        <div>
+                            <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">Estimativa (USD)</label>
+                            <input id="airdrop-estimate" type="text" placeholder="1000" style="width:100%;padding:10px;border-radius:8px;background:#0f1419;border:1px solid rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">Valor Recebido (USD)</label>
+                            <input id="airdrop-received" type="text" placeholder="1500" style="width:100%;padding:10px;border-radius:8px;background:#0f1419;border:1px solid rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;">
+                        </div>
+                    </div>
+
+                    <!-- URL do Projeto -->
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">URL do Projeto</label>
+                        <input id="airdrop-url" type="text" placeholder="https://projeto.com" style="width:100%;padding:10px;border-radius:8px;background:#0f1419;border:1px solid rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;">
+                    </div>
+
+                    <!-- Data Início e Previsão de Fim (2 colunas) -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                        <div>
+                            <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">Data de Início</label>
+                            <input id="airdrop-start-date" type="text" placeholder="dd/mm/aaaa" style="width:100%;padding:10px;border-radius:8px;background:#0f1419;border:1px solid rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">Previsão de Fim</label>
+                            <input id="airdrop-end-date" type="text" placeholder="dd/mm/aaaa" style="width:100%;padding:10px;border-radius:8px;background:#0f1419;border:1px solid rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;">
+                        </div>
+                    </div>
+
+                    <!-- Notas -->
+                    <div style="margin-bottom:20px;">
+                        <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">Notas</label>
+                        <textarea id="airdrop-notes" placeholder="Anotações sobre este airdrop..." style="width:100%;padding:10px;border-radius:8px;background:#0f1419;border:1px solid rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;font-family:inherit;resize:vertical;min-height:80px;"></textarea>
+                    </div>
+
+                    <!-- Botões -->
+                    <div style="display:flex;gap:10px;justify-content:flex-end;">
+                        <button id="airdrop-modal-cancel" style="padding:10px 20px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;cursor:pointer;">Cancelar</button>
+                        <button id="airdrop-modal-save" style="padding:10px 20px;border-radius:8px;background:#6366f1;color:#fff;border:none;cursor:pointer;font-weight:500;">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        if (!requireAuth()) {}
+    </script>
+    <script src="assets/js/ics-helpers.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+
+</html>

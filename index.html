@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Home - Offline</title>
+
+    <link rel="stylesheet" href="assets/css/site-base.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <a href="index.html" class="active">Home</a>
+            <a href="airdrops.html">My Airdrops</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="pools.html">Pools</a>
+            <a href="stakes.html">Stakes</a>
+            <a href="wallets.html">Wallets</a>
+            <a href="tarefas.html">Tasks</a>
+            <a href="admin.html" style="color:#3b82f6;">Admin</a>
+            <a href="#" onclick="UserManager.logout(); return false;" style="color:#ef4444;">Logout</a>
+        </div>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <div class="main">
+            <h1>Home</h1>
+
+            <div class="card">
+                Saldo: <span id="balance">--</span>
+            </div>
+
+            <div class="card">
+                Recompensas: <span id="rewards">--</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="assets/js/js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        // Proteger rota
+        if (!requireAuth()) {
+            // Redirecionamento já foi feito em requireAuth
+        }
+    </script>
+    <script src="assets/js/app.js"></script>
+</body>
+
+</html>

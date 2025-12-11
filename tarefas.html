@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Tarefas - Offline</title>
+    <link rel="stylesheet" href="assets/css/site-base.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+    <div class="app">
+        <div class="sidebar">
+            <a href="index.html">Home</a>
+            <a href="airdrops.html">My Airdrops</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="pools.html">Pools</a>
+            <a href="stakes.html">Stakes</a>
+            <a href="wallets.html">Wallets</a>
+            <a href="tarefas.html" class="active">Tasks</a>
+            <a href="admin.html" style="color:#3b82f6;">Admin</a>
+            <a href="#" onclick="UserManager.logout(); return false;" style="color:#ef4444;">Logout</a>
+        </div>
+
+        <div class="main">
+            <h1>Tarefas de Hoje</h1>
+            <p style="color:var(--muted);margin-top:0">Gerencie todas as suas tarefas <span id="total-tasks">(0)</span></p>
+
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;">
+                <input id="tasks-search" placeholder="Buscar por nome ou airdrop..." style="flex:1;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;">
+                <select id="tasks-airdrop-filter" style="padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;">
+                    <option value="">Todos os Airdrops</option>
+                </select>
+                <select id="tasks-frequency-filter" style="padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;">
+                    <option value="">Todas Frequências</option>
+                    <option value="Única">Única</option>
+                    <option value="Diária">Diária</option>
+                    <option value="Semanal">Semanal</option>
+                    <option value="Mensal">Mensal</option>
+                </select>
+            </div>
+
+            <div id="tasks-list" class="grid" style="grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:16px;"></div>
+        </div>
+    </div>
+
+    <script src="assets/js/js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        if (!requireAuth()) {}
+    </script>
+    <script src="assets/js/ics-helpers.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Pools - Offline</title>
+    <link rel="stylesheet" href="assets/css/site-base.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+    <div class="app">
+        <div class="sidebar">
+            <a href="index.html">Home</a>
+            <a href="airdrops.html">My Airdrops</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="pools.html" class="active">Pools</a>
+            <a href="stakes.html">Stakes</a>
+            <a href="wallets.html">Wallets</a>
+            <a href="tarefas.html">Tasks</a>
+            <a href="admin.html" style="color:#3b82f6;">Admin</a>
+            <a href="#" onclick="UserManager.logout(); return false;" style="color:#ef4444;">Logout</a>
+        </div>
+
+        <div class="main">
+            <h1>Minhas Pools</h1>
+            <p style="color:var(--muted);margin-top:0">Gerencie seus investimentos em pools de liquidez (0)</p>
+
+            <!-- Métricas Resumidas -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;">
+                <div class="card" style="padding:16px;background:linear-gradient(135deg,#1e3a8a,#1e40af);border:1px solid rgba(59,130,246,0.2);">
+                    <div style="color:var(--muted);font-size:13px;margin-bottom:8px;">Pools Ativas</div>
+                    <div style="font-size:28px;font-weight:bold;color:#60a5fa;" id="total-pools">0</div>
+                </div>
+                <div class="card" style="padding:16px;background:linear-gradient(135deg,#1b4332,#2d6a4f);border:1px solid rgba(16,185,129,0.2);">
+                    <div style="color:var(--muted);font-size:13px;margin-bottom:8px;">Valor em Pool</div>
+                    <div style="font-size:28px;font-weight:bold;color:#10b981;" id="total-value">$0.00</div>
+                </div>
+                <div class="card" style="padding:16px;background:linear-gradient(135deg,#5b21b6,#7c3aed);border:1px solid rgba(168,85,247,0.2);">
+                    <div style="color:var(--muted);font-size:13px;margin-bottom:8px;">Recompensas Acumuladas</div>
+                    <div style="font-size:28px;font-weight:bold;color:#d8b4fe;" id="total-rewards">$0.00</div>
+                </div>
+                <div class="card" style="padding:16px;background:linear-gradient(135deg,#ea580c,#f97316);border:1px solid rgba(249,115,22,0.2);">
+                    <div style="color:var(--muted);font-size:13px;margin-bottom:8px;">APY Médio</div>
+                    <div style="font-size:28px;font-weight:bold;color:#fdba74;" id="avg-apy">0.0%</div>
+                </div>
+            </div>
+
+            <!-- Filtros e Busca -->
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+                <input id="pools-search" placeholder="Buscar por protocolo ou token..." style="flex:1;min-width:250px;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;">
+                <select id="pools-status-filter" style="padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;">
+                    <option value="">Todos os Status</option>
+                    <option value="Ativo">Ativo</option>
+                    <option value="Inativo">Inativo</option>
+                </select>
+                <button id="add-pool" style="padding:10px 14px;border-radius:8px;background:#3b82f6;color:#fff;border:none;cursor:pointer;">+ Adicionar Pool</button>
+            </div>
+
+            <!-- Lista de Pools -->
+            <div id="pools-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;"></div>
+        </div>
+    </div>
+
+    <!-- Modal para Adicionar/Editar Pool -->
+    <div id="pool-form-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:1000;align-items:center;justify-content:center;padding:20px;">
+        <div style="background:#1a1f2e;border-radius:12px;padding:24px;width:90%;max-width:500px;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+            <h3 style="margin:0 0 20px 0;color:#fff;" id="pool-form-title">Nova Pool</h3>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">Protocolo*</label>
+                <input id="pool-protocol" type="text" placeholder="Ex: Uniswap, PancakeSwap, Curve..." style="width:100%;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;">
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">Token*</label>
+                <input id="pool-token" type="text" placeholder="Ex: ETH, USDC, BNB..." style="width:100%;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;">
+            </div>
+
+            <div style="display:flex;gap:12px;margin-bottom:16px;">
+                <div style="flex:1;">
+                    <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">Quantidade*</label>
+                    <input id="pool-amount" type="number" placeholder="0.00" step="0.01" min="0" style="width:100%;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;">
+                </div>
+                <div style="flex:1;">
+                    <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">Valor USD*</label>
+                    <input id="pool-value" type="number" placeholder="0.00" step="0.01" min="0" style="width:100%;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;">
+                </div>
+            </div>
+
+            <div style="display:flex;gap:12px;margin-bottom:16px;">
+                <div style="flex:1;">
+                    <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">APY (%)*</label>
+                    <input id="pool-apy" type="number" placeholder="0.00" step="0.01" min="0" max="100" style="width:100%;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;">
+                </div>
+                <div style="flex:1;">
+                    <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">Status*</label>
+                    <select id="pool-status" style="width:100%;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;">
+                        <option value="Ativo">Ativo</option>
+                        <option value="Inativo">Inativo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">Data de Início*</label>
+                <input id="pool-start-date" type="date" style="width:100%;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;">
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:6px;color:#aaa;font-size:14px;font-weight:500;">Observações</label>
+                <textarea id="pool-notes" placeholder="Ex: Pool de liquidez, rewards em tokens..." style="width:100%;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;font-family:inherit;resize:vertical;min-height:80px;"></textarea>
+            </div>
+
+            <div style="display:flex;gap:12px;justify-content:flex-end;">
+                <button id="pool-form-cancel" style="padding:10px 20px;border-radius:8px;background:transparent;color:#aaa;border:1px solid rgba(255,255,255,0.1);cursor:pointer;font-weight:500;">Cancelar</button>
+                <button id="pool-form-save" style="padding:10px 20px;border-radius:8px;background:#10b981;color:#fff;border:none;cursor:pointer;font-weight:500;">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        if (!requireAuth()) {}
+    </script>
+    <script src="assets/js/app.js"></script>
+</body>
+
+</html>
