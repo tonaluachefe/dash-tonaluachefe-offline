@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useWalletKit } from '@mysten/wallet-kit';
-import { Transaction } from '@mysten/sui.js/transactions';
+import { TransactionBlock } from '@mysten/sui.js';
 import { PACKAGE_ID } from './config';
 import './App.css';
 
@@ -37,18 +37,18 @@ function App() {
     setResult(null);
 
     try {
-      const tx = new Transaction();
+      const tx = new TransactionBlock();
       
       tx.moveCall({
         target: `${PACKAGE_ID}::my_nft::mint`,
         arguments: [
-          tx.pure.string(nftName),
-          tx.pure.string(nftUrl),
+          tx.pure(Array.from(new TextEncoder().encode(nftName))),
+          tx.pure(Array.from(new TextEncoder().encode(nftUrl))),
         ],
       });
 
       const result = await signAndExecuteTransactionBlock({
-        transaction: tx,
+        transactionBlock: tx,
       });
 
       setResult(`NFT mintado com sucesso! Transaction: ${result.digest}`);
