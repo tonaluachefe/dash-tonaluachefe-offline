@@ -306,11 +306,35 @@ if (document.getElementById('register-form')) {
 }
 
 // Proteção de rotas - verificar autenticação
-function requireAuth() {
+async function requireAuth() {
     if (!UserManager.isAuthenticated()) {
         window.location.href = 'login.html';
         return false;
     }
+    
+    // Verificar acesso baseado em NFT para novos usuários
+    const user = UserManager.getCurrentUser();
+    if (user && window.NFTManager) {
+        // Admins sempre têm acesso
+        if (UserManager.isAdmin()) {
+            return true;
+        }
+        
+        const accessCheck = await NFTManager.verifyUserAccess(user);
+        if (!accessCheck.hasAccess) {
+            // Permitir acesso à página de coleção e home mesmo sem NFT
+            const currentPath = window.location.pathname.toLowerCase();
+            const allowedPaths = ['/collection.html', '/index.html', '/login.html', '/register.html'];
+            const isAllowedPath = allowedPaths.some(path => currentPath.includes(path.toLowerCase()));
+            
+            if (!isAllowedPath) {
+                alert(accessCheck.message || 'NFT required to access the platform');
+                window.location.href = 'collection.html';
+                return false;
+            }
+        }
+    }
+    
     return true;
 }
 
@@ -329,4 +353,9 @@ function requireAdmin() {
 window.UserManager = UserManager;
 window.requireAuth = requireAuth;
 window.requireAdmin = requireAdmin;
+
+// Carregar NFT Manager se disponível
+if (typeof NFTManager !== 'undefined') {
+    window.NFTManager = NFTManager;
+}
 

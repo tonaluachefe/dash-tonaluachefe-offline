@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Feedback - Offline</title>
+    <link rel="stylesheet" href="assets/css/site-base.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+    <div class="app">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <a href="index.html">Home</a>
+            <a href="airdrops.html">My Airdrops</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="pools.html">Pools</a>
+            <a href="stakes.html">Stakes</a>
+            <a href="wallets.html">Wallets</a>
+            <a href="tarefas.html">Tasks</a>
+            <a href="collection.html">Collection</a>
+            <a href="feedback.html" class="active">Feedback</a>
+            <a href="admin.html" style="color:#3b82f6;">Admin</a>
+            <a href="#" onclick="UserManager.logout(); return false;" style="color:#ef4444;">Logout</a>
+        </div>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <div class="main">
+            <h1>Feedback & Suggestions</h1>
+            <p style="color:var(--muted);margin-top:0">Share your ideas and suggestions to help us improve the platform</p>
+
+            <!-- Feedback Form -->
+            <div class="card" style="padding: 24px; margin-bottom: 24px;">
+                <h2 style="margin: 0 0 16px 0; color: #fff;">Share Your Feedback</h2>
+                <form id="feedback-form">
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 6px; color: #aaa; font-size: 14px; font-weight: 500;">
+                            Your Email (Optional)
+                        </label>
+                        <input 
+                            id="feedback-email" 
+                            type="email" 
+                            placeholder="your@email.com" 
+                            style="width: 100%; padding: 10px; border-radius: 8px; background: #0f1419; border: 1px solid rgba(255,255,255,0.1); color: #fff; box-sizing: border-box;">
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 6px; color: #aaa; font-size: 14px; font-weight: 500;">
+                            Category
+                        </label>
+                        <select 
+                            id="feedback-category" 
+                            style="width: 100%; padding: 10px; border-radius: 8px; background: #0f1419; border: 1px solid rgba(255,255,255,0.1); color: #fff; box-sizing: border-box;">
+                            <option value="feature">New Feature Request</option>
+                            <option value="improvement">Improvement Suggestion</option>
+                            <option value="bug">Bug Report</option>
+                            <option value="ui">UI/UX Feedback</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; margin-bottom: 6px; color: #aaa; font-size: 14px; font-weight: 500;">
+                            Subject *
+                        </label>
+                        <input 
+                            id="feedback-subject" 
+                            type="text" 
+                            placeholder="Brief description of your suggestion" 
+                            required
+                            style="width: 100%; padding: 10px; border-radius: 8px; background: #0f1419; border: 1px solid rgba(255,255,255,0.1); color: #fff; box-sizing: border-box;">
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 6px; color: #aaa; font-size: 14px; font-weight: 500;">
+                            Your Feedback / Suggestion *
+                        </label>
+                        <textarea 
+                            id="feedback-message" 
+                            rows="8" 
+                            placeholder="Describe in detail what can be improved or what feature you would like to see..." 
+                            required
+                            style="width: 100%; padding: 10px; border-radius: 8px; background: #0f1419; border: 1px solid rgba(255,255,255,0.1); color: #fff; box-sizing: border-box; font-family: inherit; resize: vertical;"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                        <button 
+                            type="button" 
+                            id="feedback-cancel" 
+                            style="padding: 10px 20px; border-radius: 8px; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer;">
+                            Clear
+                        </button>
+                        <button 
+                            type="submit" 
+                            style="padding: 10px 20px; border-radius: 8px; background: #3b82f6; color: #fff; border: none; cursor: pointer; font-weight: 500;">
+                            Submit Feedback
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Previous Feedback -->
+            <div class="card" style="padding: 24px;">
+                <h2 style="margin: 0 0 16px 0; color: #fff;">Your Previous Feedback</h2>
+                <div id="feedback-list" style="display: grid; gap: 12px;">
+                    <p style="color: var(--muted); text-align: center; padding: 20px;">No feedback submitted yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/nft.js"></script>
+    <script>
+        (async () => {
+            if (!await requireAuth()) {
+                return;
+            }
+            
+            const user = UserManager.getCurrentUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Load existing feedback
+            function loadFeedback() {
+                const feedbackList = document.getElementById('feedback-list');
+                const feedbacks = JSON.parse(localStorage.getItem(`user_feedback_${user.id}`) || '[]');
+                
+                if (feedbacks.length === 0) {
+                    feedbackList.innerHTML = '<p style="color: var(--muted); text-align: center; padding: 20px;">No feedback submitted yet.</p>';
+                    return;
+                }
+
+                feedbackList.innerHTML = feedbacks.map((fb, idx) => {
+                    const categoryLabels = {
+                        'feature': 'New Feature',
+                        'improvement': 'Improvement',
+                        'bug': 'Bug Report',
+                        'ui': 'UI/UX',
+                        'other': 'Other'
+                    };
+                    const categoryColors = {
+                        'feature': '#3b82f6',
+                        'improvement': '#10b981',
+                        'bug': '#ef4444',
+                        'ui': '#8b5cf6',
+                        'other': '#6b7280'
+                    };
+
+                    return `
+                        <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; border-left: 3px solid ${categoryColors[fb.category] || '#6b7280'};">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div>
+                                    <div style="font-weight: 500; color: #fff; margin-bottom: 4px;">${fb.subject || 'No subject'}</div>
+                                    <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+                                        <span style="background: ${categoryColors[fb.category] || '#6b7280'}; padding: 4px 8px; border-radius: 4px; font-size: 11px; color: #fff;">
+                                            ${categoryLabels[fb.category] || 'Other'}
+                                        </span>
+                                        <span style="color: var(--muted); font-size: 12px;">
+                                            ${new Date(fb.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                    </div>
+                                </div>
+                                <button 
+                                    onclick="deleteFeedback(${idx})" 
+                                    style="padding: 4px 8px; border-radius: 4px; background: rgba(239,68,68,0.2); border: 1px solid #ef4444; color: #ef4444; cursor: pointer; font-size: 12px;">
+                                    Delete
+                                </button>
+                            </div>
+                            <div style="color: #aaa; font-size: 14px; margin-top: 8px; white-space: pre-wrap;">${fb.message || ''}</div>
+                            ${fb.email ? `<div style="color: var(--muted); font-size: 12px; margin-top: 8px;">Email: ${fb.email}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            window.deleteFeedback = function(idx) {
+                if (!confirm('Delete this feedback?')) return;
+                const feedbacks = JSON.parse(localStorage.getItem(`user_feedback_${user.id}`) || '[]');
+                feedbacks.splice(idx, 1);
+                localStorage.setItem(`user_feedback_${user.id}`, JSON.stringify(feedbacks));
+                loadFeedback();
+            };
+
+            // Form submission
+            document.getElementById('feedback-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const subject = document.getElementById('feedback-subject').value.trim();
+                const message = document.getElementById('feedback-message').value.trim();
+                const category = document.getElementById('feedback-category').value;
+                const email = document.getElementById('feedback-email').value.trim();
+
+                if (!subject || !message) {
+                    alert('Please fill in all required fields.');
+                    return;
+                }
+
+                const feedbacks = JSON.parse(localStorage.getItem(`user_feedback_${user.id}`) || '[]');
+                feedbacks.unshift({
+                    id: Date.now(),
+                    subject,
+                    message,
+                    category,
+                    email: email || null,
+                    date: new Date().toISOString(),
+                    userId: user.id
+                });
+
+                localStorage.setItem(`user_feedback_${user.id}`, JSON.stringify(feedbacks));
+                
+                // Clear form
+                document.getElementById('feedback-form').reset();
+                document.getElementById('feedback-email').value = user.email || '';
+                
+                alert('Thank you for your feedback! Your suggestion has been saved.');
+                loadFeedback();
+            });
+
+            // Clear button
+            document.getElementById('feedback-cancel').addEventListener('click', () => {
+                document.getElementById('feedback-form').reset();
+                document.getElementById('feedback-email').value = user.email || '';
+            });
+
+            // Pre-fill email if available
+            if (user.email) {
+                document.getElementById('feedback-email').value = user.email;
+            }
+
+            loadFeedback();
+        })();
+    </script>
+    <script src="assets/js/app.js"></script>
+</body>
+
+</html>
+

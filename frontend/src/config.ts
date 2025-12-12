@@ -5,3 +5,6 @@ export const PACKAGE_ID = "0x0"; // Cole o PackageID aqui após o deploy
 // Network configuration
 export const NETWORK = "testnet" as const;
 
+
+
+

@@ -39,3 +39,6 @@ npm run build
 - ✅ Feedback visual de sucesso/erro
 - ✅ Interface responsiva e moderna
 
+
+
+

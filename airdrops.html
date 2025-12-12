@@ -18,6 +18,8 @@
             <a href="stakes.html">Stakes</a>
             <a href="wallets.html">Wallets</a>
             <a href="tarefas.html">Tasks</a>
+            <a href="collection.html">Collection</a>
+            <a href="feedback.html">Feedback</a>
             <a href="admin.html" style="color:#3b82f6;">Admin</a>
             <a href="#" onclick="UserManager.logout(); return false;" style="color:#ef4444;">Logout</a>
         </div>
@@ -245,8 +247,11 @@
 
     <script src="assets/js/js"></script>
     <script src="assets/js/auth.js"></script>
+    <script src="assets/js/nft.js"></script>
     <script>
-        if (!requireAuth()) {}
+        (async () => {
+            if (!await requireAuth()) return;
+        })();
     </script>
     <script src="assets/js/ics-helpers.js"></script>
     <script src="assets/js/app.js"></script>

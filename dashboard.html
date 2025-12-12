@@ -56,11 +56,23 @@
             <a href="stakes.html">Stakes</a>
             <a href="wallets.html">Wallets</a>
             <a href="tarefas.html">Tasks</a>
+            <a href="collection.html">Collection</a>
+            <a href="feedback.html">Feedback</a>
             <a href="admin.html" style="color:#3b82f6;">Admin</a>
             <a href="#" onclick="UserManager.logout(); return false;" style="color:#ef4444;">Logout</a>
         </div>
 
         <div class="main">
+            <!-- Export Button -->
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+                <button 
+                    onclick="window.exportCompleteData && window.exportCompleteData()" 
+                    style="padding: 10px 20px; border-radius: 8px; background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+                    <span>📊</span>
+                    <span>Export Complete Data (CSV/Excel)</span>
+                </button>
+            </div>
+
             <!-- Primeira Linha de Métricas -->
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px;">
                 <div class="metric-card">
@@ -181,8 +193,11 @@
 
     <script src="assets/js/js"></script>
     <script src="assets/js/auth.js"></script>
+    <script src="assets/js/nft.js"></script>
     <script>
-        if (!requireAuth()) {}
+        (async () => {
+            if (!await requireAuth()) return;
+        })();
     </script>
     <script src="assets/js/app.js"></script>
 </body>

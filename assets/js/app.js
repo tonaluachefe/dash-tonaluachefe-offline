@@ -2129,3 +2129,221 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadPools();
 });
+
+/* ========== EXPORT COMPLETE DATA (CSV/Excel) ========== */
+// Function to escape CSV values
+function escapeCSV(value) {
+    if (value === null || value === undefined) return '';
+    const str = String(value);
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return '"' + str.replace(/"/g, '""') + '"';
+    }
+    return str;
+}
+
+// Function to convert array to CSV string
+function arrayToCSVString(value) {
+    if (Array.isArray(value)) {
+        return value.join('; ');
+    }
+    return String(value || '');
+}
+
+// Complete data export function
+window.exportCompleteData = function() {
+    const user = window.UserManager ? window.UserManager.getCurrentUser() : null;
+    if (!user) {
+        alert('Please login to export data.');
+        return;
+    }
+
+    // Get all data
+    const getAirdrops = () => JSON.parse(localStorage.getItem('airdrops') || '[]');
+    const getWallets = () => JSON.parse(localStorage.getItem('wallets') || '[]');
+    const getStakes = () => JSON.parse(localStorage.getItem('stakes') || '[]');
+    const getPools = () => JSON.parse(localStorage.getItem('pools') || '[]');
+    const getTasks = (airdropId) => JSON.parse(localStorage.getItem(`tasks-${airdropId}`) || '[]');
+
+    const airdrops = getAirdrops();
+    const wallets = getWallets();
+    const stakes = getStakes();
+    const pools = getPools();
+    
+    // Collect all tasks
+    const allTasks = [];
+    airdrops.forEach(a => {
+        const tasks = getTasks(a.id);
+        tasks.forEach(t => {
+            allTasks.push({
+                ...t,
+                airdropName: a.name,
+                airdropId: a.id
+            });
+        });
+    });
+
+    // Create CSV content
+    let csvContent = '';
+
+    // ===== AIRDROPS SECTION =====
+    csvContent += '\n=== AIRDROPS ===\n';
+    if (airdrops.length > 0) {
+        const airdropHeaders = [
+            'ID', 'Name', 'Identifiers', 'Category', 'Status', 'Estimate', 'Received', 
+            'URL', 'Start Date', 'End Date', 'Notes', 'Created At'
+        ];
+        csvContent += airdropHeaders.join(',') + '\n';
+        
+        airdrops.forEach(a => {
+            const row = [
+                a.id || '',
+                a.name || '',
+                arrayToCSVString(a.identifiers),
+                a.category || '',
+                a.status || '',
+                a.estimate || '',
+                a.received || '',
+                a.url || '',
+                a.startDate || '',
+                a.endDate || '',
+                (a.notes || '').replace(/\n/g, ' '),
+                a.createdAt || ''
+            ];
+            csvContent += row.map(escapeCSV).join(',') + '\n';
+        });
+    } else {
+        csvContent += 'No airdrops found.\n';
+    }
+
+    // ===== WALLETS SECTION =====
+    csvContent += '\n=== WALLETS ===\n';
+    if (wallets.length > 0) {
+        const walletHeaders = ['ID', 'Name', 'Address', 'Network', 'Active', 'Notes', 'Created At'];
+        csvContent += walletHeaders.join(',') + '\n';
+        
+        wallets.forEach(w => {
+            const row = [
+                w.id || '',
+                w.name || '',
+                w.address || '',
+                w.network || '',
+                w.active !== false ? 'Yes' : 'No',
+                (w.notes || '').replace(/\n/g, ' '),
+                w.createdAt || ''
+            ];
+            csvContent += row.map(escapeCSV).join(',') + '\n';
+        });
+    } else {
+        csvContent += 'No wallets found.\n';
+    }
+
+    // ===== STAKES SECTION =====
+    csvContent += '\n=== STAKES ===\n';
+    if (stakes.length > 0) {
+        const stakeHeaders = [
+            'ID', 'Protocol', 'Token', 'Amount', 'Value (USD)', 'APY (%)', 
+            'Status', 'Start Date', 'Unlock Date', 'Rewards', 'Notes', 'Created At'
+        ];
+        csvContent += stakeHeaders.join(',') + '\n';
+        
+        stakes.forEach(s => {
+            const row = [
+                s.id || '',
+                s.protocol || '',
+                s.token || '',
+                s.amount || '',
+                s.value || '',
+                s.apy || '',
+                s.status || '',
+                s.startDate || '',
+                s.unlockDate || '',
+                s.rewards || '',
+                (s.notes || '').replace(/\n/g, ' '),
+                s.createdAt || ''
+            ];
+            csvContent += row.map(escapeCSV).join(',') + '\n';
+        });
+    } else {
+        csvContent += 'No stakes found.\n';
+    }
+
+    // ===== POOLS SECTION =====
+    csvContent += '\n=== POOLS ===\n';
+    if (pools.length > 0) {
+        const poolHeaders = [
+            'ID', 'Protocol', 'Token', 'Amount', 'Value (USD)', 'APY (%)', 
+            'Status', 'Start Date', 'Rewards', 'Notes', 'Created At'
+        ];
+        csvContent += poolHeaders.join(',') + '\n';
+        
+        pools.forEach(p => {
+            const row = [
+                p.id || '',
+                p.protocol || '',
+                p.token || '',
+                p.amount || '',
+                p.value || '',
+                p.apy || '',
+                p.status || '',
+                p.startDate || '',
+                p.rewards || '',
+                (p.notes || '').replace(/\n/g, ' '),
+                p.createdAt || ''
+            ];
+            csvContent += row.map(escapeCSV).join(',') + '\n';
+        });
+    } else {
+        csvContent += 'No pools found.\n';
+    }
+
+    // ===== TASKS SECTION =====
+    csvContent += '\n=== TASKS ===\n';
+    if (allTasks.length > 0) {
+        const taskHeaders = [
+            'ID', 'Name', 'Airdrop', 'Airdrop ID', 'Frequency', 'Description', 'Link', 
+            'Scheduled Date', 'Created At'
+        ];
+        csvContent += taskHeaders.join(',') + '\n';
+        
+        allTasks.forEach(t => {
+            const row = [
+                t.id || '',
+                t.name || '',
+                t.airdropName || '',
+                t.airdropId || '',
+                t.frequency || '',
+                (t.description || '').replace(/\n/g, ' '),
+                t.link || '',
+                t.scheduledAt || '',
+                t.createdAt || ''
+            ];
+            csvContent += row.map(escapeCSV).join(',') + '\n';
+        });
+    } else {
+        csvContent += 'No tasks found.\n';
+    }
+
+    // ===== SUMMARY SECTION =====
+    csvContent += '\n=== SUMMARY ===\n';
+    csvContent += 'Export Date,' + new Date().toISOString() + '\n';
+    csvContent += 'User Email,' + (user.email || 'N/A') + '\n';
+    csvContent += 'Total Airdrops,' + airdrops.length + '\n';
+    csvContent += 'Total Wallets,' + wallets.length + '\n';
+    csvContent += 'Total Stakes,' + stakes.length + '\n';
+    csvContent += 'Total Pools,' + pools.length + '\n';
+    csvContent += 'Total Tasks,' + allTasks.length + '\n';
+
+    // Download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const timestamp = new Date().toISOString().split('T')[0];
+    a.download = `complete_export_${timestamp}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    alert(`Export completed!\n\nExported:\n- ${airdrops.length} Airdrops\n- ${wallets.length} Wallets\n- ${stakes.length} Stakes\n- ${pools.length} Pools\n- ${allTasks.length} Tasks`);
+};
